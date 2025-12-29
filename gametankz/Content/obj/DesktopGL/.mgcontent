@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/bullets_upscayl_16x_remacri-4x.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/ground_upscayl_16x_remacri-4x.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/health_1_upscayl_16x_remacri-4x.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/health_2_upscayl_16x_remacri-4x.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/light.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/logo.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/part_2.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/part_50.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/part_53.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/walls_upscayl_16x_remacri-4x.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/asset/xx.png</File>
+    <File>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/File.spritefont</File>
+  </SourceFiles>
+  <DestFiles>
+    <File>asset/bullet.png</File>
+    <File>asset/ground.png</File>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File>asset/walls.png</File>
+    <File xsi:nil="true" />
+    <File>Arial.spritefont</File>
+  </DestFiles>
+</SourceFileCollection>

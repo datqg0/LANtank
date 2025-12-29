@@ -1,0 +1,12 @@
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\bin\Release\net9.0\MonoGameLibrary.deps.json
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\bin\Release\net9.0\MonoGameLibrary.dll
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\bin\Release\net9.0\MonoGameLibrary.pdb
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\MonoGameLibrary.csproj.AssemblyReference.cache
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\MonoGameLibrary.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\MonoGameLibrary.AssemblyInfoInputs.cache
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\MonoGameLibrary.AssemblyInfo.cs
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\MonoGameLibrary.csproj.CoreCompileInputs.cache
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\MonoGameLibrary.dll
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\refint\MonoGameLibrary.dll
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\MonoGameLibrary.pdb
+C:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Release\net9.0\ref\MonoGameLibrary.dll

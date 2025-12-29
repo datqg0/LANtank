@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PipelineBuildEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SourceFile>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/File.spritefont</SourceFile>
+  <SourceTime>2025-10-20T20:59:04+07:00</SourceTime>
+  <DestFile>c:/Users/dat/Downloads/New folder (17)/gametankz/Content/bin/DesktopGL/Arial.xnb</DestFile>
+  <DestTime>2025-12-22T17:55:27.0176946+07:00</DestTime>
+  <Importer>FontDescriptionImporter</Importer>
+  <ImporterTime>2025-10-20T21:25:32+07:00</ImporterTime>
+  <Processor>FontDescriptionProcessor</Processor>
+  <ProcessorTime>2025-10-20T21:25:32+07:00</ProcessorTime>
+  <Parameters>
+    <Key>PremultiplyAlpha</Key>
+    <Value>True</Value>
+  </Parameters>
+  <Parameters>
+    <Key>TextureFormat</Key>
+    <Value>Compressed</Value>
+  </Parameters>
+  <Dependencies />
+  <BuildAsset />
+  <BuildOutput />
+</PipelineBuildEvent>
