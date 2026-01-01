@@ -5,11 +5,19 @@ using System.Text;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Specialized;
 
 struct Vector2
 {
     public float X, Y;
     public Vector2(float x, float y) { X = x; Y = y; }
+}
+
+class Health
+{
+    public int Id;
+    public float X, Y;
+    public DateTime SpawnTime;
 }
 
 class Tank
@@ -102,6 +110,8 @@ class Server
     static Dictionary<TcpClient, Tank> clientTanks = new();
     static List<TcpClient> clients = new();
     static List<Bullet> bullets = new();
+    static double ExistLim = 10;
+    static List<Health> healths = new();
     static Dictionary<int, int> scores = new();
 
     static GameMap gameMap = new(40, 22);
@@ -110,6 +120,7 @@ class Server
 
     static int nextTankId = 1;
     static int nextBulletId = 1;
+    static int nextHealthId = 1;
 
     static void Main()
     {
@@ -138,7 +149,18 @@ class Server
             new Thread(HandleClient) { IsBackground = true }.Start(c);
         }
     }
-
+    static void SpawnHealth ()
+    {
+        Vector2 spawn = FindSpawn();
+        Health h = new()
+        {
+            Id = nextHealthId++,
+            X = spawn.X,
+            Y = spawn.Y,
+            SpawnTime = DateTime.Now
+        };
+        healths.Add(h);
+    }
     static Vector2 FindSpawn()
     {
         while (true)
@@ -289,12 +311,56 @@ class Server
             lock (lockObj)
             {
                 UpdateBullets(dt);
+                UpdateHealth();
                 ResolveTankCollisions();
                 Broadcast();
             }
         }
     }
+    static void UpdateHealth()
+    {
+        Random rand = new Random();
+        int value = rand.Next(0, 2);
+        if (value==1&&healths.Count<2)
+        {
+            SpawnHealth();
+        }
+        List<Health> removeList = new List<Health>();
 
+        foreach (var h in healths)
+        {
+            double ExistTime = (DateTime.Now - h.SpawnTime).TotalSeconds;
+            bool Used = false;
+
+            if (ExistTime > ExistLim)
+            {
+                Used = true;
+            }
+            else
+            {
+                foreach (var t in clientTanks.Values)
+                {
+                    if (RectIntersect(
+                        h.X, h.Y, 32, 32,
+                        t.X, t.Y, TANK_SIZE, TANK_SIZE))
+                    {
+                        t.HP = Math.Min(t.HP + 50, 100);
+                        Used = true;
+                        break;
+                    }
+                }
+            }
+
+            if (Used)
+                removeList.Add(h);
+        }
+
+        // xóa sau
+        foreach (var h in removeList)
+        {
+            healths.Remove(h);
+        }
+    }
     static void UpdateBullets(float dt)
     {
         for (int i = bullets.Count - 1; i >= 0; i--)
@@ -355,6 +421,45 @@ class Server
         NEXT:;
         }
     }
+    static bool CanPushTank(Tank self, Tank ignore, float newX, float newY)
+    {
+        if (gameMap.BoxHitsWall(newX, newY, TANK_SIZE, TANK_SIZE))
+            return false;
+
+        foreach (var other in clientTanks.Values)
+        {
+            if (other == self) continue;
+            if (other == ignore) continue;
+
+            if (RectIntersect(
+                newX, newY, TANK_SIZE, TANK_SIZE,
+                other.X, other.Y, TANK_SIZE, TANK_SIZE))
+                return false;
+        }
+
+        return true;
+    }
+
+    static bool RectIntersect(
+    float x1, float y1, float w1, float h1,
+    float x2, float y2, float w2, float h2)
+    {
+        float aL = x1;
+        float aR = x1 + TANK_SIZE;
+        float aT = y1;
+        float aB = y1 + TANK_SIZE;
+
+        float bL = x2;
+        float bR = x2 + TANK_SIZE;
+        float bT = y2;
+        float bB = y2 + TANK_SIZE;
+
+        if (aL < bR && aR > bL && aT < bB && aB > bT)
+        {
+            return true;
+        }
+        return false;    
+    }
     static void ResolveTankCollisions()
     {
         var tanks = clientTanks.Values.ToArray();
@@ -365,43 +470,91 @@ class Server
                 Tank a = tanks[i];
                 Tank b = tanks[j];
 
-                float aL = a.X;
-                float aR = a.X + TANK_SIZE;
-                float aT = a.Y;
-                float aB = a.Y + TANK_SIZE;
+                if (RectIntersect(
+                    a.X, a.Y, TANK_SIZE, TANK_SIZE,
+                    b.X, b.Y, TANK_SIZE, TANK_SIZE)==false)
+                    continue;
+                //Console.WriteLine("run");
+                float overlapX = Math.Min(
+                    a.X + TANK_SIZE - b.X,
+                    b.X + TANK_SIZE - a.X);
 
-                float bL = b.X;
-                float bR = b.X + TANK_SIZE;
-                float bT = b.Y;
-                float bB = b.Y + TANK_SIZE;
+                float overlapY = Math.Min(
+                    a.Y + TANK_SIZE - b.Y,
+                    b.Y + TANK_SIZE - a.Y);
 
-                if (aL < bR && aR > bL && aT < bB && aB > bT)
+                if (overlapX < overlapY)
                 {
-                    float overlapX = Math.Min(aR - bL, bR - aL);
-                    float overlapY = Math.Min(aB - bT, bB - aT);
+                    float push = overlapX / 2f;
 
-                    if (overlapX < overlapY)
-                    {
-                        float push = overlapX / 2;
-                        if (a.X < b.X) { a.X -= push; b.X += push; }
-                        else { a.X += push; b.X -= push; }
-                    }
+                    if (a.X < b.X)
+                        TryPushX(a, b, -push, push);
                     else
-                    {
-                        float push = overlapY / 2;
-                        if (a.Y < b.Y) { a.Y -= push; b.Y += push; }
-                        else { a.Y += push; b.Y -= push; }
-                    }
+                        TryPushX(a, b, push, -push);
+                }
+                else
+                {
+                    float push = overlapY / 2f;
+
+                    if (a.Y < b.Y)
+                        TryPushY(a, b, -push, push);
+                    else
+                        TryPushY(a, b, push, -push);
                 }
             }
     }
+    static void TryPushY(Tank a, Tank b, float da, float db)
+    {
+        bool aOK = CanPushTank(a,b, a.X, a.Y + da);
+        bool bOK = CanPushTank(b,a, b.X, b.Y + db);
+        //bool aOK = true;
+        //bool bOK = true;
+        if (aOK && bOK)
+        {
+            a.Y += da;
+            b.Y += db;
+        }
+        else if (aOK)
+        {
+            a.Y += da;
+        }
+        else if (bOK)
+        {
+            b.Y += db;
+        }
+    }
+
+    static void TryPushX(Tank a, Tank b, float da, float db)
+    {
+        bool aOK = CanPushTank(a,b, a.X + da, a.Y);
+        bool bOK = CanPushTank(b,a, b.X + db, b.Y);
+        //bool aOK = true;
+        //bool bOK = true;
+        if (aOK && bOK)
+        {
+            a.X += da;
+            b.X += db;
+        }
+        else if (aOK)
+        {
+            a.X += da;
+        }
+        else if (bOK)
+        {
+            b.X += db;
+        }
+    }
+
+
 
 
     static void Broadcast()
     {
         StringBuilder sb = new();
-        sb.Append("{\"tanks\":[");
+        sb.Append("{");
 
+        // ================= TANKS =================
+        sb.Append("\"tanks\":[");
         bool ft = true;
         foreach (var t in clientTanks.Values)
         {
@@ -409,8 +562,10 @@ class Server
             sb.Append($"{{\"id\":{t.Id},\"x\":{t.X:F1},\"y\":{t.Y:F1},\"hp\":{t.HP},\"dirX\":{t.DirX},\"dirY\":{t.DirY},\"score\":{scores.GetValueOrDefault(t.Id)}}}");
             ft = false;
         }
+        sb.Append("],");
 
-        sb.Append("],\"bullets\":[");
+        // ================= BULLETS =================
+        sb.Append("\"bullets\":[");
         bool fb = true;
         foreach (var b in bullets)
         {
@@ -418,11 +573,24 @@ class Server
             sb.Append($"{{\"id\":{b.Id},\"x\":{b.X:F1},\"y\":{b.Y:F1},\"dirX\":{b.DirX},\"dirY\":{b.DirY}}}");
             fb = false;
         }
+        sb.Append("],");
 
-        sb.Append("]}\n");
+        // ================= HEALTHS =================
+        sb.Append("\"healths\":[");
+        bool fh = true;
+        foreach (var h in healths)
+        {
+            if (!fh) sb.Append(",");
+            sb.Append($"{{\"id\":{h.Id},\"x\":{h.X:F1},\"y\":{h.Y:F1}}}");
+            fh = false;
+        }
+        sb.Append("]");
+
+        sb.Append("}\n");
 
         byte[] data = Encoding.UTF8.GetBytes(sb.ToString());
         foreach (var c in clients)
             try { c.GetStream().Write(data); } catch { }
     }
+
 }

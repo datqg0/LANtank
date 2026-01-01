@@ -53,7 +53,7 @@ namespace gametankz.Network
             }
         }
 
-        private void ReceiveLoop()
+        private void ReceiveLoopbackup()
         {
             byte[] buffer = new byte[8192];
             StringBuilder sb = new();
@@ -92,6 +92,57 @@ namespace gametankz.Network
                         catch
                         {
                             // JSON parse error
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                isConnected = false;
+            }
+        }
+
+        private void ReceiveLoop()
+        {
+            byte[] buffer = new byte[8192];
+            StringBuilder sb = new();
+
+            try
+            {
+                while (isConnected)
+                {
+                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
+                    if (bytesRead == 0)
+                    {
+                        isConnected = false;
+                        break;
+                    }
+
+                    sb.Append(Encoding.UTF8.GetString(buffer, 0, bytesRead));
+
+                    while (true)
+                    {
+                        string dataStr = sb.ToString();
+                        int newlineIndex = dataStr.IndexOf('\n');
+
+                        if (newlineIndex < 0)
+                            break; // chưa đủ 1 gói
+
+                        // Lấy 1 JSON hoàn chỉnh
+                        string json = dataStr.Substring(0, newlineIndex);
+                        sb.Remove(0, newlineIndex + 1);
+
+                        try
+                        {
+                            var state = JsonSerializer.Deserialize<GameState>(json);
+                            if (state != null)
+                            {
+                                currentState = state;
+                            }
+                        }
+                        catch
+                        {
+                            // parse fail (có thể log khi debug)
                         }
                     }
                 }

@@ -91,3 +91,5 @@ c:\Users\dat\Downloads\New folder (17)\gametankz\obj\Debug\net9.0\gametankz.cspr
 c:\Users\dat\Downloads\New folder (17)\gametankz\obj\Debug\net9.0\gametankz.genruntimeconfig.cache
 c:\Users\dat\Downloads\New folder (17)\gametankz\obj\Debug\net9.0\ref\gametankz.dll
 C:\Users\dat\Downloads\New folder (17)\gametankz\bin\Debug\net9.0\Content\Arial.xnb
+c:\Users\dat\Downloads\New folder (17)\gametankz\obj\Debug\net9.0\gametankz.sourcelink.json
+c:\Users\dat\Downloads\New folder (17)\gametankz\bin\Debug\net9.0\Content\asset\powerups_upscayl_16x_remacri-4x.xnb

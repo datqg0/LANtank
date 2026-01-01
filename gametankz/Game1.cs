@@ -43,12 +43,10 @@ namespace gametankz
         TextureRegion bulletLeft;
         TextureRegion bulletRight;
         TextureRegion healthBarSprite;
+        TextureRegion[] healthSprite = new TextureRegion[3];
         // ===== INPUT THROTTLE =====
         double inputThrottle = 0.02; // 10ms threshold
         double timeSinceLastInput = 0;
-
-        // ===== DEBUG =====
-        bool showCollisionDebug = false;
 
         public Game1() : base("tank", 1280, 720, false) { }
 
@@ -63,7 +61,16 @@ namespace gametankz
             {
                 font = null; // Nếu không tìm thấy, dùng DrawText fallback
             }
-
+            // ===== HEALTH ===
+            Texture2D HealthTex = Content.Load<Texture2D>("asset/powerups_upscayl_16x_remacri-4x");
+            TextureAtlas hatlas = new TextureAtlas(HealthTex);
+            int hw = HealthTex.Width / 20;
+            int hh = HealthTex.Height;
+            for (int i=0;i<3;i++)
+            {
+                hatlas.AddRegion($"h_{i+9}",(i+9)*hw,0,hw,hh);
+                healthSprite[i] = hatlas.GetRegion($"h_{i+9}");
+            }
             // ===== TANK =====
             tankpic = Content.Load<Texture2D>("asset/light");
             TextureAtlas atlas = new TextureAtlas(tankpic);
@@ -294,7 +301,7 @@ namespace gametankz
             // Hướng dẫn
             DrawText("TAB: Switch | BACKSPACE: Delete | ENTER: Connect", 640, 610, Color.White, 1f);
         }
-
+        int healthState=0;
         void DrawGameplay()
         {
             // Vẽ map
@@ -352,7 +359,7 @@ namespace gametankz
                         0f
                     );
                 }
-
+                
                 // Vẽ bullets từ server
                 foreach (var bulletData in networkClient.CurrentState.bullets)
                 {
@@ -374,7 +381,24 @@ namespace gametankz
                         0f
                     );
                 }
-
+                //vẽ hồi máu
+                foreach (var healthData in networkClient.CurrentState.healths)
+                {
+                    // Xác định sprite dựa trên direction
+                    TextureRegion HealthSprite = healthSprite[healthState];
+                    healthState+=1;
+                    healthState%=3;
+                    HealthSprite.Draw(
+                        SpriteBatch,
+                        new Vector2(healthData.x, healthData.y),
+                        Color.White,
+                        0f,
+                        Vector2.One,
+                        0.1f,
+                        SpriteEffects.None,
+                        0f
+                    );
+                }
                 // Vẽ điểm của player ở góc trên cùng
                 if (playerTankId != -1)
                 {
@@ -386,7 +410,7 @@ namespace gametankz
                 }
             }
         }
-
+        
         void DrawText(string text, int x, int y, Color color, float scale = 1f)
         {
             if (font != null)

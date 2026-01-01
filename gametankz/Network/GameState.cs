@@ -6,5 +6,6 @@ namespace gametankz.Network
     {
         public List<TankData> tanks { get; set; } = new();
         public List<BulletData> bullets { get; set; } = new();
+        public List<HealthData> healths{ get; set; } = new();
     }
 }

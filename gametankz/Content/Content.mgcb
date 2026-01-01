@@ -121,6 +121,18 @@
 /processorParam:TextureFormat=Color
 /build:asset/part_53.png
 
+#begin asset/powerups_upscayl_16x_remacri-4x.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:asset/powerups_upscayl_16x_remacri-4x.png
+
 #begin asset/walls_upscayl_16x_remacri-4x.png
 /importer:TextureImporter
 /processor:TextureProcessor

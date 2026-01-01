@@ -22,3 +22,4 @@ c:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Debug\net9.0\MonoGame
 c:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Debug\net9.0\refint\MonoGameLibrary.dll
 c:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Debug\net9.0\MonoGameLibrary.pdb
 c:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Debug\net9.0\ref\MonoGameLibrary.dll
+c:\Users\dat\Downloads\New folder (17)\MonoGameLibrary\obj\Debug\net9.0\MonoGameLibrary.sourcelink.json
