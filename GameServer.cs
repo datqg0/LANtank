@@ -24,6 +24,7 @@ class Tank
 {
     public int Id;
     public float X, Y;
+    public string Name;
     public int DirX = 0, DirY = -1;
     public int HP = 100;
     public DateTime LastShotTime;
@@ -141,7 +142,13 @@ class Server
             lock (lockObj)
             {
                 Vector2 spawn = FindSpawn();
-                Tank t = new() { Id = nextTankId++, X = spawn.X, Y = spawn.Y };
+                Tank t = new()
+                {
+                    Id = nextTankId++,
+                    X = spawn.X,
+                    Y = spawn.Y,
+                    Name = RandomTankName()
+                };
                 clientTanks[c] = t;
                 clients.Add(c);
                 Console.WriteLine($"Tank {t.Id} connected");
@@ -171,12 +178,30 @@ class Server
                 return new Vector2(x, y);
         }
     }
+    static string RandomTankName()
+    {
+        string[] a =
+        {
+        "Do Mixi", "Big", "Fire", "Ash", "Cute",
+        "Chill", "36", "Ronado", "Long", "Messi"
+    };
+
+        string[] b =
+        {
+        "Bob", "Dik", "Dat", "Thanh Hoa", "EAI",
+        "Guy", "Shot", "lowg", "psy", "Ahs"
+    };
+
+        return a[rand.Next(a.Length)] + " " +
+               b[rand.Next(b.Length)] + " " +
+               rand.Next(1, 99);
+    }
 
     static void HandleClient(object obj)
     {
         TcpClient c = (TcpClient)obj;
         NetworkStream s = c.GetStream();
-        byte[] buf = new byte[32];
+        byte[] buf = new byte[256];
 
         try
         {
@@ -209,6 +234,17 @@ class Server
 
                     Tank t = clientTanks[c];
                     float speed = 100f / 30f;
+                    if (cmd.StartsWith("NAME:"))
+                    {
+                        string name = cmd.Substring(5).Trim();
+
+                        if (string.IsNullOrEmpty(name) || name == "0")
+                            t.Name = RandomTankName();
+                        else
+                            t.Name = name;
+
+                        continue;
+                    }
 
                     if (cmd == "1") { t.DirX = 0; t.DirY = -1; MoveTank(t, 0, -speed); }
                     if (cmd == "2") { t.DirX = -1; t.DirY = 0; MoveTank(t, -speed, 0); }
@@ -227,6 +263,7 @@ class Server
 
                 clientTanks.Remove(c);
                 clients.Remove(c);
+                scores.Remove(t.Id);
             }
 
             try { s.Close(); } catch { }
@@ -319,7 +356,6 @@ class Server
     }
     static void UpdateHealth()
     {
-        Random rand = new Random();
         int value = rand.Next(0, 2);
         if (value==1&&healths.Count<2)
         {
@@ -526,7 +562,6 @@ class Server
 
     static void TryPushX(Tank a, Tank b, float da, float db)
     {
-        //commit
         bool aOK = CanPushTank(a,b, a.X + da, a.Y);
         bool bOK = CanPushTank(b,a, b.X + db, b.Y);
         //bool aOK = true;
@@ -560,7 +595,7 @@ class Server
         foreach (var t in clientTanks.Values)
         {
             if (!ft) sb.Append(",");
-            sb.Append($"{{\"id\":{t.Id},\"x\":{t.X:F1},\"y\":{t.Y:F1},\"hp\":{t.HP},\"dirX\":{t.DirX},\"dirY\":{t.DirY},\"score\":{scores.GetValueOrDefault(t.Id)}}}");
+            sb.Append($"{{\"id\":{t.Id},\"Name\":\"{t.Name}\",\"x\":{t.X:F1},\"y\":{t.Y:F1},\"hp\":{t.HP},\"dirX\":{t.DirX},\"dirY\":{t.DirY},\"score\":{scores.GetValueOrDefault(t.Id)}}}");
             ft = false;
         }
         sb.Append("],");
