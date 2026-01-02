@@ -12,6 +12,7 @@ namespace gametankz
 {
     public class Game1 : Core
     {
+        string playerName = "";
         public static Texture2D tankpic;
 
         int framecount = 16;
@@ -34,7 +35,7 @@ namespace gametankz
         GameState gameState = GameState.Menu;
         string ipInput = "127.0.0.1";
         string roomCodeInput = "3636";
-        int selectedField = 0; // 0 = IP, 1 = Room Code
+        int selectedField = 0; // 0 = IP, 1 = Room Code // 2 Name
         KeyboardState prevKeyboard;
 
         // ===== SPRITES =====
@@ -180,7 +181,7 @@ namespace gametankz
             // Tab để chuyển field
             if (k.IsKeyDown(Keys.Tab) && !prevKeyboard.IsKeyDown(Keys.Tab))
             {
-                selectedField = (selectedField + 1) % 2;
+                selectedField = (selectedField + 1) % 3;
             }
 
             // Backspace để xóa
@@ -190,6 +191,8 @@ namespace gametankz
                     ipInput = ipInput.Substring(0, ipInput.Length - 1);
                 else if (selectedField == 1 && roomCodeInput.Length > 0)
                     roomCodeInput = roomCodeInput.Substring(0, roomCodeInput.Length - 1);
+                else if (selectedField == 2 && playerName.Length > 0)
+                    playerName = playerName.Substring(0, playerName.Length - 1);
             }
 
             // Xử lý input ký tự
@@ -205,6 +208,8 @@ namespace gametankz
                             ipInput += c;
                         else if (selectedField == 1 && char.IsDigit(c))
                             roomCodeInput += c;
+                        else if (selectedField == 2)
+                            playerName += c;
                     }
                 }
             }
@@ -218,6 +223,7 @@ namespace gametankz
                     networkClient = new NetworkClient(ipInput, port);
                     if (networkClient.IsConnected)
                     {
+                        networkClient.SendInput("NAME:" + playerName);
                         gameState = GameState.Playing;
                         // Lấy tank ID của player (tank đầu tiên trong danh sách)
                         if (networkClient.CurrentState != null && networkClient.CurrentState.tanks.Count > 0)
@@ -292,11 +298,14 @@ namespace gametankz
             Color codeColor = selectedField == 1 ? Color.Yellow : Color.White;
             DrawText("Port:", 400, 350, Color.White, 1f);
             DrawInputBox(700, 350, roomCodeInput, codeColor);
-
+            //Name
+            Color nameColor = selectedField == 2 ? Color.Yellow : Color.White;
+            DrawText("Name :", 400, 450, Color.White, 1f);
+            DrawInputBox(700, 450, playerName, nameColor);
             // Join Button
             bool isHoveringButton = false; // Có thể mở rộng sau
             Color buttonColor = isHoveringButton ? Color.LimeGreen : Color.White;
-            DrawButton(640, 470, "[ENTER] JOIN ROOM", buttonColor);
+            DrawButton(800, 470, "[ENTER] JOIN ROOM", buttonColor);
 
             // Hướng dẫn
             DrawText("TAB: Switch | BACKSPACE: Delete | ENTER: Connect", 640, 610, Color.White, 1f);
@@ -384,10 +393,10 @@ namespace gametankz
                 //vẽ hồi máu
                 foreach (var healthData in networkClient.CurrentState.healths)
                 {
-                    // Xác định sprite dựa trên direction
-                    TextureRegion HealthSprite = healthSprite[healthState];
                     healthState+=1;
-                    healthState%=3;
+                    healthState%=60;
+                    int idx = healthState/20;
+                    TextureRegion HealthSprite = healthSprite[idx];
                     HealthSprite.Draw(
                         SpriteBatch,
                         new Vector2(healthData.x, healthData.y),
@@ -401,21 +410,68 @@ namespace gametankz
                 }
                 // Vẽ điểm của player ở góc trên cùng
                 if (playerTankId != -1)
-                {
-                    var playerTank = networkClient.CurrentState.tanks.FirstOrDefault(t => t.id == playerTankId);
-                    if (playerTank != null)
                     {
-                        DrawText($"SCORE: {playerTank.score}", 100, 30, Color.White, 1f);
+                        int i = 1;
+                        int w = 32;
+
+                        var sortedTanks = networkClient.CurrentState.tanks
+                            .OrderByDescending(t => t.score)
+                            .ToList();
+
+                        bool playerInTop = false;
+
+                        // In TOP 3
+                        foreach (var tankData in sortedTanks)
+                        {
+                            if (tankData.id == playerTankId)
+                            {
+                                playerInTop = true;
+                                DrawText($"{tankData.Name} : {tankData.score}", 50, w * i, Color.Yellow, 1f);
+                            }
+                            else
+                            {
+                                DrawText($"{tankData.Name} : {tankData.score}", 50, w * i, Color.White, 1f);
+                            }
+
+                            if (i == 1)
+                                w = 28;
+
+                            i++;
+                            if (i > 3)
+                                break;
+                        }
+
+                        // Nếu player KHÔNG nằm trong top → in thêm dòng màu xanh
+                        if (!playerInTop)
+                        {
+                            var playerTank = sortedTanks
+                                .FirstOrDefault(t => t.id == playerTankId);
+
+                            if (playerTank != null)
+                            {
+                                DrawText(
+                                    $"{playerTank.Name} : {playerTank.score}",
+                                    50,
+                                    w * (i ),   // in cách top ra 1 dòng
+                                    Color.Yellow,
+                                    1f
+                                );
+                            }
+                        }
                     }
-                }
+
             }
         }
         
         void DrawText(string text, int x, int y, Color color, float scale = 1f)
         {
-            if (font != null)
+            if (gameState == GameState.Menu)
             {
                 SpriteBatch.DrawString(font, text, new Vector2(x - font.MeasureString(text).X / 2 * scale, y), color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
+            }
+            else if(gameState == GameState.Playing)
+            {
+                SpriteBatch.DrawString(font, text, new Vector2(x, y), color, 0, Vector2.Zero, scale, SpriteEffects.None, 0);
             }
             else
             {

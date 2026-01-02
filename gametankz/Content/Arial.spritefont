@@ -1,14 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
   <Asset Type="Graphics:FontDescription">
-    <FontName>Courier New</FontName>
-    <Size>24</Size>
+
+    <FontName>Segoe UI</FontName>
+    <Size>22</Size>
     <Spacing>0</Spacing>
-    <UseKerning>false</UseKerning>
-    <Characters/>
-    <ResizableFontSize>
-      <ReachProfile>HiDef</ReachProfile>
-      <ReachProfile>Reach</ReachProfile>
-    </ResizableFontSize>
+    <UseKerning>true</UseKerning>
+    <Style>Regular</Style>
+
+    <CharacterRegions>
+      <!-- ASCII -->
+      <CharacterRegion>
+        <Start>32</Start>
+        <End>126</End>
+      </CharacterRegion>
+
+      <!-- Vietnamese lowercase -->
+      <CharacterRegion>
+        <Start>224</Start>
+        <End>253</End>
+      </CharacterRegion>
+
+      <!-- Vietnamese uppercase -->
+      <CharacterRegion>
+        <Start>192</Start>
+        <End>221</End>
+      </CharacterRegion>
+
+      <!-- Vietnamese combined -->
+      <CharacterRegion>
+        <Start>7840</Start>
+        <End>7929</End>
+      </CharacterRegion>
+    </CharacterRegions>
+
   </Asset>
 </XnaContent>
