@@ -44,7 +44,7 @@ namespace gametankz.Network
 
             try
             {
-                byte[] data = Encoding.UTF8.GetBytes(input);
+                byte[] data = Encoding.UTF8.GetBytes(input + "\n");
                 stream.Write(data, 0, data.Length);
             }
             catch

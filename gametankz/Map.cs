@@ -49,8 +49,8 @@ public class Map
         }
 
         // Tạo map cố định - lưới tường thưa hơn (8 tiles spacing)
-        for (int y = 4; y < h - 2; y += 8)
-        for (int x = 4; x < w - 2; x += 8)
+        for (int y = 6; y < h - 2; y += 8)
+        for (int x = 7; x < w - 2; x += 8)
         {
             grid[y, x]     = 1;
             grid[y+1, x]   = 1;

@@ -63,8 +63,8 @@ class GameMap
             grid[y, 0] = 1;
             grid[y, w - 1] = 1;
         }
-        for (int y = 4; y < h - 2; y += 8)
-            for (int x = 4; x < w - 2; x += 8)
+        for (int y = 6; y < h - 2; y += 8)
+            for (int x = 7; x < w - 2; x += 8)
             {
                 grid[y, x] = 1;
                 grid[y + 1, x] = 1;
@@ -443,7 +443,8 @@ class Server
 
                         if (t.HP <= 0)
                         {
-                            scores[b.OwnerId] = scores.GetValueOrDefault(b.OwnerId) + 1;
+                            scores[b.OwnerId] = scores.GetValueOrDefault(b.OwnerId)+2;
+                            scores[t.Id] = scores.GetValueOrDefault(t.Id) / 2;
                             Vector2 sp = FindSpawn();
                             t.X = sp.X; t.Y = sp.Y; t.HP = 100;
                         }
@@ -510,6 +511,26 @@ class Server
                     a.X, a.Y, TANK_SIZE, TANK_SIZE,
                     b.X, b.Y, TANK_SIZE, TANK_SIZE)==false)
                     continue;
+                a.HP -= 2;
+                b.HP -= 2;
+                if (a.HP <= 0 || b.HP <= 0)
+                {
+                    if (a.HP <= 0)
+                    {
+                        scores[b.Id] = scores.GetValueOrDefault(b.Id) + 2;
+                        scores[a.Id] = scores.GetValueOrDefault(a.Id) / 2;
+                        Vector2 sp = FindSpawn();
+                        a.X = sp.X; a.Y = sp.Y; a.HP = 100;
+                    }
+                    if (b.HP <= 0)
+                    {
+                        scores[a.Id] = scores.GetValueOrDefault(a.Id) + 2;
+                        scores[b.Id] = scores.GetValueOrDefault(b.Id) / 2;
+                        Vector2 sp = FindSpawn();
+                        b.X = sp.X; b.Y = sp.Y; b.HP = 100;
+                    }
+                    continue;
+                }
                 //Console.WriteLine("run");
                 float overlapX = Math.Min(
                     a.X + TANK_SIZE - b.X,
