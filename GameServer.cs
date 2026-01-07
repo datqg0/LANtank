@@ -401,6 +401,7 @@ class Server
             {
                 foreach (var t in clientTanks.Values)
                 {
+                    if (t.SpawnTime > 0) continue;
                     if (RectIntersect(
                         h.X, h.Y, 32, 32,
                         t.X, t.Y, TANK_SIZE, TANK_SIZE))
@@ -457,7 +458,7 @@ class Server
                 foreach (var t in clientTanks.Values)
                 {
                     if (t.Id == b.OwnerId) continue;
-
+                    if (t.SpawnTime > 0) continue;
                     if (hx < t.X + TANK_SIZE &&
                         hx + BULLET_HITBOX > t.X &&
                         hy < t.Y + TANK_SIZE &&
