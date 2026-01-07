@@ -27,6 +27,7 @@ class Tank
     public string Name;
     public int DirX = 0, DirY = -1;
     public int HP = 100;
+    public float SpawnTime = 0;
     public DateTime LastShotTime;
 }
 
@@ -37,7 +38,7 @@ class Bullet
     public float X, Y;
     public float HX, HY;
     public int DirX, DirY;
-    public float Speed = 500f;
+    public float Speed = 400f;
     public bool Alive = true;
 }
 
@@ -250,7 +251,14 @@ class Server
                     if (cmd == "2") { t.DirX = -1; t.DirY = 0; MoveTank(t, -speed, 0); }
                     if (cmd == "3") { t.DirX = 0; t.DirY = 1; MoveTank(t, 0, speed); }
                     if (cmd == "4") { t.DirX = 1; t.DirY = 0; MoveTank(t, speed, 0); }
-                    if (cmd == "0") Shoot(t);
+                    if (cmd == "0")
+                    {
+                        if(t.SpawnTime>0)
+                        {
+                            continue;
+                        }
+                        Shoot(t);
+                    }
                 }
             }
         }
@@ -303,7 +311,7 @@ class Server
 
     static void Shoot(Tank t)
     {
-        if ((DateTime.Now - t.LastShotTime).TotalSeconds < 0.25) return;
+        if ((DateTime.Now - t.LastShotTime).TotalSeconds < 0.4) return;
         if (t.DirX == 0 && t.DirY == 0) t.DirY = -1;
 
         float cx = t.X + TANK_SIZE / 2;
@@ -350,7 +358,24 @@ class Server
                 UpdateBullets(dt);
                 UpdateHealth();
                 ResolveTankCollisions();
+                UpdateTank();
                 Broadcast();
+            }
+        }
+    }
+    static void UpdateTank()
+    {
+        foreach (var t in clientTanks.Values)
+        {
+            if(t.SpawnTime >0)
+            {
+                t.SpawnTime -= 0.01f;
+                if(t.SpawnTime <=0)
+                {
+                    t.SpawnTime = 0;
+                    Vector2 sp = FindSpawn();
+                    t.X = sp.X; t.Y = sp.Y; t.HP = 100;
+                }
             }
         }
     }
@@ -443,10 +468,9 @@ class Server
 
                         if (t.HP <= 0)
                         {
-                            scores[b.OwnerId] = scores.GetValueOrDefault(b.OwnerId)+2;
+                            scores[b.OwnerId] = scores.GetValueOrDefault(b.OwnerId) + 2;
                             scores[t.Id] = scores.GetValueOrDefault(t.Id) / 2;
-                            Vector2 sp = FindSpawn();
-                            t.X = sp.X; t.Y = sp.Y; t.HP = 100;
+                            t.SpawnTime = 3;
                         }
                         goto NEXT;
                     }
@@ -506,7 +530,10 @@ class Server
             {
                 Tank a = tanks[i];
                 Tank b = tanks[j];
-
+                if(a.SpawnTime>0||b.SpawnTime>0)
+                {
+                    continue;
+                }
                 if (RectIntersect(
                     a.X, a.Y, TANK_SIZE, TANK_SIZE,
                     b.X, b.Y, TANK_SIZE, TANK_SIZE)==false)
@@ -515,19 +542,22 @@ class Server
                 b.HP -= 2;
                 if (a.HP <= 0 || b.HP <= 0)
                 {
-                    if (a.HP <= 0)
+                    if(a.HP<=0&&b.HP<=0)
+                    {
+                        a.SpawnTime = 3;
+                        b.SpawnTime = 3;
+                    }
+                    else if (a.HP <= 0)
                     {
                         scores[b.Id] = scores.GetValueOrDefault(b.Id) + 2;
                         scores[a.Id] = scores.GetValueOrDefault(a.Id) / 2;
-                        Vector2 sp = FindSpawn();
-                        a.X = sp.X; a.Y = sp.Y; a.HP = 100;
+                        a.SpawnTime = 3;
                     }
-                    if (b.HP <= 0)
+                    else if (b.HP <= 0)
                     {
                         scores[a.Id] = scores.GetValueOrDefault(a.Id) + 2;
                         scores[b.Id] = scores.GetValueOrDefault(b.Id) / 2;
-                        Vector2 sp = FindSpawn();
-                        b.X = sp.X; b.Y = sp.Y; b.HP = 100;
+                        b.SpawnTime = 3;
                     }
                     continue;
                 }
@@ -616,7 +646,7 @@ class Server
         foreach (var t in clientTanks.Values)
         {
             if (!ft) sb.Append(",");
-            sb.Append($"{{\"id\":{t.Id},\"Name\":\"{t.Name}\",\"x\":{t.X:F1},\"y\":{t.Y:F1},\"hp\":{t.HP},\"dirX\":{t.DirX},\"dirY\":{t.DirY},\"score\":{scores.GetValueOrDefault(t.Id)}}}");
+            sb.Append($"{{\"id\":{t.Id},\"Name\":\"{t.Name}\",\"x\":{t.X:F1},\"y\":{t.Y:F1},\"hp\":{t.HP},\"dirX\":{t.DirX},\"dirY\":{t.DirY},\"spawntime\":{t.SpawnTime},\"score\":{scores.GetValueOrDefault(t.Id)}}}");
             ft = false;
         }
         sb.Append("],");

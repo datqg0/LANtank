@@ -322,7 +322,7 @@ namespace gametankz
                 foreach (var tankData in networkClient.CurrentState.tanks)
                 {
                     // Bỏ qua tank nếu hết máu
-                    if (tankData.hp <= 0) continue;
+                    if (tankData.spawntime > 0) continue;
 
                     // Xác định frame dựa trên direction
                     int frameIdx = 0;
@@ -421,16 +421,18 @@ namespace gametankz
                         bool playerInTop = false;
 
                         // In TOP 3
+                        int PosStand = 0;
                         foreach (var tankData in sortedTanks)
                         {
+                            PosStand ++;
                             if (tankData.id == playerTankId)
                             {
                                 playerInTop = true;
-                                DrawText($"{tankData.Name} : {tankData.score}", 50, w * i, Color.Yellow, 1f);
+                                DrawText($"{PosStand} - {tankData.Name} : {tankData.score}", 50, w * i, Color.Yellow, 1f);
                             }
                             else
                             {
-                                DrawText($"{tankData.Name} : {tankData.score}", 50, w * i, Color.White, 1f);
+                                DrawText($"{PosStand} - {tankData.Name} : {tankData.score}", 50, w * i, Color.White, 1f);
                             }
 
                             if (i == 1)
@@ -440,23 +442,33 @@ namespace gametankz
                             if (i > 3)
                                 break;
                         }
-
+                        var playerTank = sortedTanks
+                                .FirstOrDefault(t => t.id == playerTankId);;
                         // Nếu player KHÔNG nằm trong top → in thêm dòng màu xanh
                         if (!playerInTop)
                         {
-                            var playerTank = sortedTanks
-                                .FirstOrDefault(t => t.id == playerTankId);
+                            int index = sortedTanks.FindIndex(t => t.id == playerTankId);
 
                             if (playerTank != null)
                             {
                                 DrawText(
-                                    $"{playerTank.Name} : {playerTank.score}",
+                                    $"{index+1} - {playerTank.Name} : {playerTank.score}",
                                     50,
                                     w * (i ),   // in cách top ra 1 dòng
                                     Color.Yellow,
                                     1f
                                 );
                             }
+                        }
+                        if (playerTank.spawntime>0)
+                        {
+                            DrawText(
+                                    $" spawn_time : {playerTank.spawntime}",
+                                    400,
+                                    w * (i ),   // in cách top ra 1 dòng
+                                    Color.LightBlue,
+                                    1f
+                                );
                         }
                     }
 
