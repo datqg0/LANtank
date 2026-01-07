@@ -635,8 +635,8 @@ class Server
 
 
 
-    // truyen du lieu
-    
+    // maybe this can be improve
+
     static void Broadcast()
     {
         StringBuilder sb = new();
